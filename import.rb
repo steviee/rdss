@@ -23,21 +23,24 @@ def create_pdf(file)
 
 	pdf_file = "#{BASEDIR}/work/#{File.basename(file, File.extname(file))}.pdf"
 
+  system "libreoffice", "--headless", "--convert-to pdf", file
+
 	Libreconv.convert file, pdf_file
 	return pdf_file
 end
 
 def create_images(file)
 
-
-	pdf = Magick::Image.read(file)	
-	pg = 1
+	pdf = Magick::Image.read(file)	{ self.density="200x200" }
+  pg = 1
 	pdf.each do |page|
 		jpg_file = "#{BASEDIR}/work/#{File.basename(file, File.extname(file))}_#{pg}.jpg"
 		pg += 1
 		puts "Creating JPG #{jpg_file}"
-		page.write(jpg_file){ self.units= Magick::ResolutionType::PixelsPerInchResolution; self.density="200"; self.quality=90 }
-	end
+    page.profile!("8bim",nil)
+    page.write(jpg_file){ self.units=Magick::ResolutionType::PixelsPerInchResolution; self.density="200x200"; self.quality=100 }
+
+  end
 
 
 end	
